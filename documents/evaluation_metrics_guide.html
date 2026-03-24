@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>evaluation_metrics_guide.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<!--ここから追記 1.(数式に対応させる)-->
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax:{inlineMath: [['$', '$']]},
+      messageStyle: "none"
+    });
+</script>
+<!--追記 1.ここまで-->
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+  <!--ここから追記 2.(--- で改ページ)-->
+  <style>  
+    hr {  
+      opacity: 0;  
+      break-after: page;  
+    }  
+  </style>  
+  <!--追記 2.ここまで-->
+<h1 id="%E4%B8%8D%E6%AD%A3%E6%A4%9C%E7%9F%A5%E3%83%A2%E3%83%87%E3%83%AB-%E8%A9%95%E4%BE%A1%E6%8C%87%E6%A8%99%E3%82%AC%E3%82%A4%E3%83%89">不正検知モデル 評価指標ガイド</h1>
+<p>対象読者：IT・機械学習の専門知識がない方<br>
+目的：モデルの「良し悪し」を正しく読み解くための評価指標を理解する</p>
+<blockquote>
+<h3 id="%E3%81%93%E3%81%AE%E3%83%89%E3%82%AD%E3%83%A5%E3%83%A1%E3%83%B3%E3%83%88%E3%82%92%E8%AA%AD%E3%82%80%E5%89%8D%E3%81%AB%E7%9F%A5%E3%81%A3%E3%81%A6%E3%81%8A%E3%81%8D%E3%81%9F%E3%81%84%E3%81%93%E3%81%A8">このドキュメントを読む前に知っておきたいこと</h3>
+<p>不正検知モデルでは「全部正常と判定する」だけで正解率99%超えになってしまうことがあります。<br>
+なぜなら、実際の取引において不正は全体の0.1〜1%程度しか存在しないからです。<br>
+正解率（Accuracy）が高くても、不正を1件も見つけられていないという状況が起こり得ます。<br>
+そのため、不正検知では「正解率」ではなく、以降で説明する専用の評価指標を追加います。</p>
+</blockquote>
+<div style="page-break-before: always;"></div>
+<h2 id="%E6%8C%87%E6%A8%99%E2%91%A0-%E6%B7%B7%E5%90%8C%E8%A1%8C%E5%88%97confusion-matrix">指標① 混同行列（Confusion Matrix）</h2>
+<h3 id="%E6%A6%82%E8%A6%81">概要</h3>
+<p>モデルの予測結果を「正解・不正解」の4パターンに分類して整理した表です。<br>
+全ての評価指標の土台となる考え方であり、最初に理解すべき指標です。</p>
+<h3 id="4%E3%81%A4%E3%81%AE%E3%83%91%E3%82%BF%E3%83%BC%E3%83%B3">4つのパターン</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:left">モデルが「正常」と予測</th>
+<th style="text-align:left">モデルが「不正」と予測</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">実際は「正常」</td>
+<td style="text-align:left">✅ TN (True Negative)<br>正常を正常と判定</td>
+<td style="text-align:left">⚠️ FP (False Positive)<br>正常を不正と誤検知</td>
+</tr>
+<tr>
+<td style="text-align:left">実際は「不正」</td>
+<td style="text-align:left">🚨 FN (False Negative)<br>不正を見逃し</td>
+<td style="text-align:left">TP (True Positive)<br>不正を不正と正しく検知</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E6%95%B0%E5%BC%8F">数式</h3>
+<p>$$<br>
+\text{混同行列} = \begin{pmatrix}TN &amp; FP \ FN &amp; TP \end{pmatrix}<br>
+$$</p>
+<p>各記号の意味：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">記号</th>
+<th style="text-align:left">英語</th>
+<th style="text-align:left">意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>TP</strong></td>
+<td style="text-align:left">True Positive</td>
+<td style="text-align:left">「不正」を正しく「不正」と判定できた件数</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>TN</strong></td>
+<td style="text-align:left">True Negative</td>
+<td style="text-align:left">「正常」を正しく「正常」と判定できた件数</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>FP</strong></td>
+<td style="text-align:left">False Positive</td>
+<td style="text-align:left">「正常」なのに「不正」と誤って判定した件数</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>FN</strong></td>
+<td style="text-align:left">False Negative</td>
+<td style="text-align:left">「不正」なのに「正常」と見逃した件数</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E3%81%A9%E3%82%93%E3%81%AA%E5%A0%B4%E9%9D%A2%E3%81%A7%E4%BD%BF%E3%81%86%E8%A9%95%E4%BE%A1%E6%8C%87%E6%A8%99%E3%81%8B">どんな場面で使う評価指標か</h3>
+<p>混同行列は <strong>「何を間違えているのか」を具体的に把握したいとき</strong> に使います。<br>
+数字を見るだけで「不正を見逃しているのか」「正常を止めすぎているのか」が一目でわかります。</p>
+<p>ビジネス上の意味に置き換えると以下のようになります。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">パターン</th>
+<th style="text-align:left">ビジネスへの影響</th>
+<th style="text-align:left">深刻度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>FN（見逃し）</strong></td>
+<td style="text-align:left">不正取引が通過し、金銭的損失が発生する</td>
+<td style="text-align:left">🚨 高</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>FP（誤検知）</strong></td>
+<td style="text-align:left">正常な顧客の取引が止まり、クレームにつながる</td>
+<td style="text-align:left">⚠️ 中</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="%E4%BE%8B%E9%A1%8C">例題</h3>
+<p>1万件のテスト取引（うち不正100件）に対してモデルが予測した結果が以下だったとします。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left"></th>
+<th style="text-align:center">予測：正常</th>
+<th style="text-align:center">予測：不正</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>実際：正常</strong></td>
+<td style="text-align:center">9,870件(TN)</td>
+<td style="text-align:center">30件（FP）</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>実際：不正</strong></td>
+<td style="text-align:center">10件（FN）</td>
+<td style="text-align:center">90件（TP）</td>
+</tr>
+</tbody>
+</table>
+<p>この結果から読み取れること：</p>
+<ul>
+<li><strong>不正100件のうち90件を検知できた</strong></li>
+<li><strong>正常9,900件のうち30件を誤って止めてしまった</strong>（30名の顧客に影響）</li>
+<li>30名への誤検知は許容範囲か、10件の見逃しは許容できるか、という<strong>ビジネス判断</strong>が次のステップになります。</li>
+</ul>
+<div style="page-break-before: always;"></div>
+<h2 id="%E6%8C%87%E6%A8%99%E2%91%A1-precision%E9%81%A9%E5%90%88%E7%8E%87">指標② Precision（適合率）</h2>
+<h3 id="%E6%A6%82%E8%A6%81">概要</h3>
+<p>モデルが <strong>「不正だ」と判定した件数のうち、本当に不正だった割合</strong> です。<br>
+「モデルが鳴らしたアラートのうち、何割が本物だったか」を表します。</p>
+<h3 id="%E6%95%B0%E5%BC%8F">数式</h3>
+<p>$$<br>
+\text{Precision} = \frac{TP}{TP + FP}<br>
+$$</p>
+<p>$$<br>
+= \frac{\text{正しく検知した不正件数}}{\text{不正と予測した件数の合計}}<br>
+$$</p>
+<ul>
+<li>値の範囲：0〜1（1.0 が理想）</li>
+<li>Precision が低い -&gt; <strong>「空振り（誤検知）が多い」</strong> 状態</li>
+</ul>
+<h3 id="%E3%81%A9%E3%82%93%E3%81%AA%E5%A0%B4%E9%9D%A2%E3%81%A7%E4%BD%BF%E3%81%86%E8%A9%95%E4%BE%A1%E6%8C%87%E6%A8%99%E3%81%8B">どんな場面で使う評価指標か</h3>
+<p><strong>「誤検知（FP）のコストが大きい場面」</strong> で重視します。</p>
+<p>不正検知の文脈では、モデルが「不正だ」とアラートを出すたびに審査担当者が確認作業をする運用が一般的です。Precision が低いと、<strong>担当者が大量の「空振りアラート」を処理することになり、業務負荷が増大</strong>します。</p>
+<p>また、<strong>顧客の取引を止める行為は顧客体験の悪化</strong>につながるため、Precision は顧客満足度にも直結します。</p>
+<h3 id="%E4%BE%8B%E9%A1%8C">例題</h3>
+<p>モデルが「不正」と判定した件数：<strong>200件</strong><br>
+そのうち本当に不正だった件数：<strong>50件</strong></p>
+<p>$$<br>
+\text{Precision} = \frac{50}{200} = 0.25 \quad (25%)<br>
+$$</p>
+<p>解釈：アラートがなった200件のうち、本物の不正は25%しかない。<br>
+審査担当者は150件の「空振り確認作業」を行なっていることになります。<br>
+-&gt; <strong>Precision を上げることで、無駄な調査コストを削減できます。</strong></p>
+<div style="page-break-before: always;"></div>
+<h2 id="%E6%8C%87%E6%A8%99%E2%91%A2-recall%E5%86%8D%E7%8F%BE%E7%8E%87">指標③ Recall（再現率）</h2>
+<h3 id="%E6%A6%82%E8%A6%81">概要</h3>
+<p><strong>実際の不正取引のうち、モデルが正しく検知できた割合</strong> です。<br>
+「本物の不正を何割捕まえられたか」を表します。<br>
+「感度(Sensitivity)」や「真陽性率(TPR)」とも呼ばれます。</p>
+<h3 id="%E6%95%B0%E5%BC%8F">数式</h3>
+<p>$$<br>
+\text{Recall} = \frac{TP}{TP + FN}<br>
+$$</p>
+<p>$$<br>
+= \frac{\text{正しく検知した不正件数}}{\text{実際の不正件数の合計}}<br>
+$$</p>
+<ul>
+<li>値の範囲：0〜1（1.0 が理想）</li>
+<li>Recall が低い -&gt; <strong>「見逃しが多い」</strong> 状態</li>
+</ul>
+<h3 id="%E3%81%A9%E3%82%93%E3%81%AA%E5%A0%B4%E9%9D%A2%E3%81%A7%E4%BD%BF%E3%81%86%E8%A9%95%E4%BE%A1%E6%8C%87%E6%A8%99%E3%81%8B">どんな場面で使う評価指標か</h3>
+<p><strong>「見逃し(FN)のコストが大きい場面」</strong> で重視します。</p>
+<p>不正検知において、見逃した不正取引は <strong>そのまま金銭的損失</strong> につながります。<br>
+特に高額な不正や、組織的な詐欺グループによる連続不正の場合、1件の見逃しが大きな損害を招く可能性があります。</p>
+<p>一般的に <strong>「不正を見逃す損失 &gt; 正常を止める損失」</strong> となるケースが多く、<br>
+Recall を高めることが不正検知では優先されることが多いです。</p>
+<h3 id="%E4%BE%8B%E9%A1%8C">例題</h3>
+<p>実際の不正取引：100件<br>
+そのうちモデルが検知できた件数：80件</p>
+<p>$$<br>
+\text{Recall} = \frac{80}{100} = 0.80 \quad (80%)<br>
+$$</p>
+<p>【解釈】</p>
+<ul>
+<li>100件のうち80件は止められたが、20件は素通りしている状態。</li>
+<li>この20件が引き起こす金銭的損失が許容できるかどうかが判断基準になります。<br>
+-&gt; <strong>Recallを引き上げることで、見逃しによる損失を減らせます。</strong></li>
+</ul>
+<div style="page-break-before: always;"></div>
+<h2 id="%E6%8C%87%E6%A8%99%E2%91%A3-f1%E3%82%B9%E3%82%B3%E3%82%A2">指標④ F1スコア</h2>
+<h3 id="%E6%A6%82%E8%A6%81">概要</h3>
+<p>Precision と Recall の <strong>バランスを1つの数値で表した指標</strong> です。<br>
+「誤検知を減らしたい（Precision重視）」と「見逃しを減らしたい（Recall重視）」は、<br>
+トレードオフの関係にあり、どちらか一方を上げようとするともう一方が下がる傾向がありまうす。<br>
+F1スコアはその両方を総合的に評価します。</p>
+<h3 id="%E6%95%B0%E5%BC%8F">数式</h3>
+<p>$$<br>
+\text{F1} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}<br>
+$$</p>
+<ul>
+<li>値の範囲：0〜1（1.0 が理想）</li>
+<li>Precision と Recall の両方が高いときだけ高い値になる</li>
+<li>どちらが一方が極端に低いと、F1も低くなる</li>
+</ul>
+<h3 id="%E3%81%A9%E3%82%93%E3%81%AA%E5%A0%B4%E9%9D%A2%E3%81%A7%E4%BD%BF%E3%81%86%E8%A9%95%E4%BE%A1%E6%8C%87%E6%A8%99%E3%81%8B">どんな場面で使う評価指標か</h3>
+<p><strong>「Precision と Recall をバランスよく保ちたい場面」</strong> で使います。</p>
+<p>また、後述する <strong>閾値(判定ラインの強さ)の最適値を探す時</strong> にも使われます。<br>
+閾値を動かしながらF1スコアが最大になるポイントを探すことで、<br>
+「検知精度と誤検知のバランスが最も良い設定」を自動的に見つけることができます。</p>
+<blockquote>
+<p>💡 但し、実務では、F1最大が必ずしも正解ではありません。<br>
+「不正1件の見逃しは顧客クレーム何件分に相当するか」というビジネスコストに基づいて調整します。</p>
+</blockquote>
+<h3 id="%E4%BE%8B%E9%A1%8C">例題</h3>
+<p>あるモデルの評価結果：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">指標</th>
+<th style="text-align:center">スコア</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Precision</td>
+<td style="text-align:center">0.60</td>
+</tr>
+<tr>
+<td style="text-align:left">Recall</td>
+<td style="text-align:center">0.80</td>
+</tr>
+</tbody>
+</table>
+<p>$$<br>
+\text{F1} = 2 \times \frac{0.60 \times 0.80}{0.60 + 0.80}<br>
+= 2 \times \frac{0.48}{1.40} \approx 0.686<br>
+$$</p>
+<p>【解釈】</p>
+<ul>
+<li>誤検知率（Precision）と見逃し率（Recall）のバランスを統合すると、<br>
+このモデルの総合スコアは 約0.69 です。</li>
+</ul>
+<div style="page-break-before: always;"></div>
+<h2 id="%E6%8C%87%E6%A8%99%E2%91%A4-auc-roc-roc%E6%9B%B2%E7%B7%9A%E3%81%AE%E9%9D%A2%E7%A9%8D">指標⑤ AUC-ROC （ROC曲線の面積）</h2>
+<h3 id="%E6%A6%82%E8%A6%81">概要</h3>
+<p><strong>「検知率(Recall)」と「誤検知率(FPR)」のトレードオフを面積で表した指標</strong> です。<br>
+モデルが「不正」と「正常」をどれだけ正確に区別できているかを、<strong>閾値に依存しない形</strong> で測ります。</p>
+<p>ROC曲線とは、「判定の厳しさ（閾値）」を少しずつ変化させながら、<br>
+縦軸に検知率、横軸に誤検知率をプロットした曲線です。<br>
+その <strong>曲線の下の面積 (Area Under the Curve)</strong> がAUC-ROCです。</p>
+<h3 id="%E6%95%B0%E5%BC%8F">数式</h3>
+<p>$$<br>
+\text{AUC-ROC} = \int_{0}^{1} \text{TPR}(t), d, \text{FPR}(t)<br>
+$$</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">記号</th>
+<th style="text-align:left">意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>TPR (True Positive Rate)</strong></td>
+<td style="text-align:left">不正をどれだけ検知できているか (=Recall)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>FPR (False Positive Rate)</strong></td>
+<td style="text-align:left">正常をどれだけ誤検知しているか</td>
+</tr>
+</tbody>
+</table>
+<p>【スコアの目安】</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">AUC-ROC</th>
+<th style="text-align:left">評価</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1.00</td>
+<td style="text-align:left">完璧</td>
+</tr>
+<tr>
+<td style="text-align:center">0.90以上</td>
+<td style="text-align:left">優秀（実務の目標水準）</td>
+</tr>
+<tr>
+<td style="text-align:center">0.70〜0.89</td>
+<td style="text-align:left">実用的</td>
+</tr>
+<tr>
+<td style="text-align:center">0.50</td>
+<td style="text-align:left">ランダムと同義</td>
+</tr>
+<tr>
+<td style="text-align:center">0.50未満</td>
+<td style="text-align:left">モデルに問題がある</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E3%81%A9%E3%82%93%E3%81%AA%E5%A0%B4%E9%9D%A2%E3%81%A7%E4%BD%BF%E3%81%86%E8%A9%95%E4%BE%A1%E6%8C%87%E6%A8%99%E3%81%8B">どんな場面で使う評価指標か</h3>
+<p><strong>「閾値の設定に関係なく、モデル自体の識別能力を評価したい時」</strong> に使います。</p>
+<p>例えば、異なる2つのモデルを比較する際、閾値の設定で有利・不利が生じないよう、<br>
+AUC-ROCを使ってフラットに比較できます。<br>
+また、モデルを本番環境に導入する前の品質チェックの基準として用いられることが多い指標です。</p>
+<blockquote>
+<p>⚠️ 注意点</p>
+<ul>
+<li>不正率が極点に低い (0.1%未満) データでは、AUC-ROCが楽観的な値を示すことがあります。</li>
+<li>そのような場合は次の指標「AUC-PR」を合わせて確認します。</li>
+</ul>
+</blockquote>
+<hr>
+<h3 id="%E4%BE%8B%E9%A1%8C">例題</h3>
+<p>2つのモデルを同じテストデータで評価した結果</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">モデル</th>
+<th style="text-align:center">AUC-ROC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">モデルA（XGBoost）</td>
+<td style="text-align:center">0.96</td>
+</tr>
+<tr>
+<td style="text-align:left">モデルB（旧システム）</td>
+<td style="text-align:center">0.82</td>
+</tr>
+</tbody>
+</table>
+<p>【解釈】</p>
+<ul>
+<li>モデルAの方が、不正と正常の区別能力が大幅に優れています。</li>
+<li>閾値の設定に関係なく、モデルAの方が信頼できると判断できます。</li>
+</ul>
+<div style="page-break-before: always;"></div>
+<h2 id="%E6%8C%87%E6%A8%99%E2%91%A5-auc-prprecision-recall-%E6%9B%B2%E7%B7%9A%E3%81%AE%E9%9D%A2%E7%A9%8D">指標⑥ AUC-PR（Precision-Recall 曲線の面積）</h2>
+<h3 id="%E6%A6%82%E8%A6%81">概要</h3>
+<p><strong>Precision と Recall のトレードオフを面積で表した指標</strong> で、<br>
+正式には <strong>Average Precision (AP)</strong> とも呼ばれます。</p>
+<p>AUC-ROCに似ていますが、こちらは <strong>不正(少数の陽性クラス)の検知性能に特化</strong> した評価です。<br>
+不正率が極めて低いデータ（いわゆる「不均衡データ」）では、AUC-ROCよりも厳しく・正直な評価が得られます。</p>
+<h3 id="%E6%95%B0%E5%BC%8F">数式</h3>
+<p>$$<br>
+\text{AP} = \sum_{k} \bigl(\text{Recall}<em>{k} - \text{Recall}</em>{k-1}\bigr) \times \text{Precision}_{k}<br>
+$$</p>
+<p>閾値を変化させながら Precision と Recall を計算し、その変化量の積み上げで面積を算出します。</p>
+<p>【スコアの目安】</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">AP（AUC-ROC）</th>
+<th style="text-align:left">評価</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1.00</td>
+<td style="text-align:left">完璧</td>
+</tr>
+<tr>
+<td style="text-align:center">不正率より大幅に高い</td>
+<td style="text-align:left">モデルが機能している</td>
+</tr>
+<tr>
+<td style="text-align:center">不正率（例：0.005）と同程度</td>
+<td style="text-align:left">ランダムと同じ（無意味）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 【ポイント】</p>
+<ul>
+<li>ランダムな予測をした場合のAPは「不正率」と同じ値になります。</li>
+<li>つまり、「不正率よりどれだけ上回っているか」がモデルの価値を示します。</li>
+</ul>
+</blockquote>
+<h3 id="%E3%81%A9%E3%82%93%E3%81%AA%E5%A0%B4%E9%9D%A2%E3%81%A7%E4%BD%BF%E3%81%86%E8%A9%95%E4%BE%A1%E6%8C%87%E6%A8%99%E3%81%8B">どんな場面で使う評価指標か</h3>
+<p>「不均衡データでモデルを評価するとき」に使います。</p>
+<p>AUC-ROCだけを見ていると「良いモデル」と思っても、実は不正をほとんど検知できていないという事態が起こり得ます。<br>
+AUC-PRは不正クラスに厳しい評価を行うため、AUC-ROCと必ずセットで確認するのが実務の標準です。</p>
+<hr>
+<h3 id="%E4%BE%8B%E9%A1%8C">例題</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">評価</th>
+<th style="text-align:center">AUC-ROC</th>
+<th style="text-align:center">AUC-PR (AP)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ランダムな予測(基準)</td>
+<td style="text-align:center">0.50</td>
+<td style="text-align:center">0.005</td>
+</tr>
+<tr>
+<td style="text-align:left">今回のモデル</td>
+<td style="text-align:center">0.96</td>
+<td style="text-align:center">0.72</td>
+</tr>
+</tbody>
+</table>
+<p>【解釈】<br>
+AUC-ROCだけ見ると0.96と非常に高い数値ですが、AUC-PRでも0.72とランダム(0.005)を大幅に上回っており、不正検知の実力があるモデルと判断できます。<br>
+もし、AUC-ROCは高いのにAPが低い場合は、正常取引の分類は得意でも不正の検知が弱いモデルということになります。</p>
+<div style="page-break-before: always;"></div>
+<h2 id="%E7%95%AA%E5%A4%96%E7%B7%A8-%E9%96%BE%E5%80%A4threshold">番外編 閾値（Threshold）</h2>
+<h3 id="%E6%A6%82%E8%A6%81">概要</h3>
+<p>モデルは各取引に対して「0〜1の不正確率スコア」を出力します。<br>
+例えば「この取引の不正確率は0.73(73%)」というように。</p>
+<p><strong>閾値(Threshold)</strong> とは、この確率スコアを元に「不正 or 正常」を２択で判定する時の <strong>境界線</strong> です。</p>
+<h3 id="%E6%95%B0%E5%BC%8F">数式</h3>
+<p>$$<br>
+\text{予測ラベル} = \begin{cases}<br>
+\text{不正 (1)} &amp; \text{スコア} \geq \text{閾値} \<br>
+\text{正常 (0)} &amp; \text{スコア} &lt; \text{閾値}<br>
+\end{cases}<br>
+$$</p>
+<h3 id="%E9%96%BE%E5%80%A4%E3%82%92%E5%8B%95%E3%81%8B%E3%81%99%E3%81%A8%E3%81%A9%E3%81%86%E3%81%AA%E3%82%8B%E3%81%8B">閾値を動かすとどうなるか</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">閾値を下げる（例：0.3）</th>
+<th style="text-align:left">閾値を上げる（例：0.7）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">より多くの取引を「不正」と判定</td>
+<td style="text-align:left">より少ない取引を「不正」と判定</td>
+</tr>
+<tr>
+<td style="text-align:left">Recall（検知率）が上がる</td>
+<td style="text-align:left">Precision（的中率）が上がる</td>
+</tr>
+<tr>
+<td style="text-align:left">FP（誤検知）が増える</td>
+<td style="text-align:left">FN（見逃し）が増える</td>
+</tr>
+<tr>
+<td style="text-align:left">顧客への影響が大きくなる</td>
+<td style="text-align:left">不正見逃しが増える</td>
+</tr>
+</tbody>
+</table>
+<h3 id="%E3%81%A9%E3%82%93%E3%81%AA%E5%A0%B4%E9%9D%A2%E3%81%A7%E4%BD%BF%E3%81%86%E8%A9%95%E4%BE%A1%E6%8C%87%E6%A8%99%E3%81%8B">どんな場面で使う評価指標か</h3>
+<p>「ビジネス要件に合わせてモデルの判定ラインを調整する時」に使います。</p>
+<p>デフォルトの閾値は0.5ですが、これが最適とは限りません。<br>
+実務では以下のようなビジネス上の問いを立てて閾値を決定します。</p>
+<blockquote>
+<p>「不正を1件見逃した時の損失と、正常な顧客を1件止めた時のコスト、どちらが大きいか？」</p>
+</blockquote>
+<h3 id="%E4%BE%8B%E9%A1%8C">例題</h3>
+<p>同じモデルで閾値だけ変えた場合の比較（テスト件数1万件、うち不正100件）</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">閾値</th>
+<th style="text-align:center">検知できた不正（Recall）</th>
+<th style="text-align:center">誤検知件数（FP）</th>
+<th style="text-align:center">F1スコア</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0.3</td>
+<td style="text-align:center">95件(95%)</td>
+<td style="text-align:center">150件</td>
+<td style="text-align:center">0.54</td>
+</tr>
+<tr>
+<td style="text-align:center">0.5(デフォルト)</td>
+<td style="text-align:center">80件(80%)</td>
+<td style="text-align:center">60件</td>
+<td style="text-align:center">0.68</td>
+</tr>
+<tr>
+<td style="text-align:center">0.7</td>
+<td style="text-align:center">60件(60%)</td>
+<td style="text-align:center">15件</td>
+<td style="text-align:center">0.73</td>
+</tr>
+</tbody>
+</table>
+<p>【解釈】</p>
+<ul>
+<li>F1スコアだけ見ると 閾値0.7 が最も高いですが、不正の40％を見逃しています。</li>
+<li>不正の見逃しによる損失が大きい場合は、あえて閾値を下げて検知率を優先することが合理的な判断になります。</li>
+<li>正解は1つではなく、ビジネスの要件が決定します。</li>
+</ul>
+<div style="page-break-before: always;"></div>
+<h2 id="%E4%BB%98%E9%8C%B2-%E8%A9%95%E4%BE%A1%E6%8C%87%E6%A8%99%E3%81%AE%E9%81%B8%E3%81%B3%E6%96%B9-%E6%97%A9%E8%A6%8B%E8%A1%A8">付録 評価指標の選び方 早見表</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">知りたいこと</th>
+<th style="text-align:left">使う指標</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">不正を何割検知できているか</td>
+<td style="text-align:left"><a href="#%E6%8C%87%E6%A8%99-recall%E5%86%8D%E7%8F%BE%E7%8E%87">Recall</a></td>
+</tr>
+<tr>
+<td style="text-align:left">アラートのうち本物不正は何割か</td>
+<td style="text-align:left"><a href="#%E6%8C%87%E6%A8%99-precision%E9%81%A9%E5%90%88%E7%8E%87">Precision</a></td>
+</tr>
+<tr>
+<td style="text-align:left">検知率と精度のバランスをみたい</td>
+<td style="text-align:left"><a href="#%E6%8C%87%E6%A8%99-f1%E3%82%B9%E3%82%B3%E3%82%A2">F1スコア</a></td>
+</tr>
+<tr>
+<td style="text-align:left">モデルの識別能力を総合的に評価したい</td>
+<td style="text-align:left"><a href="#%E6%8C%87%E6%A8%99-auc-roc-roc%E6%9B%B2%E7%B7%9A%E3%81%AE%E9%9D%A2%E7%A9%8D">AUC-ROC</a></td>
+</tr>
+<tr>
+<td style="text-align:left">不均衡データで不正検知能力を厳しく評価したい</td>
+<td style="text-align:left"><a href="#%E6%8C%87%E6%A8%99-auc-prprecision-recall-%E6%9B%B2%E7%B7%9A%E3%81%AE%E9%9D%A2%E7%A9%8D">AUC-PR (Average Precision)</a></td>
+</tr>
+<tr>
+<td style="text-align:left">何件見逃して、何件誤検知したかを具体的に把握したい</td>
+<td style="text-align:left"><a href="#%E6%8C%87%E6%A8%99-%E6%B7%B7%E5%90%8C%E8%A1%8C%E5%88%97confusion-matrix">混同行列</a></td>
+</tr>
+<tr>
+<td style="text-align:left">検知率と誤検知のバランスを調整したい</td>
+<td style="text-align:left"><a href="#%E7%95%AA%E5%A4%96%E7%B7%A8-%E9%96%BE%E5%80%A4threshold">閾値(Threshold)チューニング</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="%E4%BB%98%E9%8C%B2%E5%90%84%E6%8C%87%E6%A8%99%E3%81%AE%E9%96%A2%E4%BF%82%E5%9B%B3">付録：各指標の関係図</h2>
+<pre class="hljs"><code><div>全テストデータ
+    │
+    ├─ 実際は「正常」
+    │       ├─ 正常と予測 → TN ✅
+    │       └─ 不正と予測 → FP ⚠️  ← Precision に影響
+    │
+    └─ 実際は「不正」
+            ├─ 正常と予測 → FN 🚨  ← Recall に影響
+            └─ 不正と予測 → TP ✅
+ 
+ 
+Precision = TP / (TP + FP)   ← 「不正と言ったとき、どれだけ当たっているか」
+Recall    = TP / (TP + FN)   ← 「本物の不正を、どれだけ見つけられているか」
+F1        = 両者の調和平均    ← 「PrecisionとRecallのバランス」
+ 
+AUC-ROC   ← 閾値に依存しない、モデル全体の識別力
+AUC-PR    ← 不均衡データに対する、不正クラスへの検知力
+</div></code></pre>
+<p><em>このドキュメントは <code>src/evaluate.py</code> の評価ロジックに対応しています。</em><br>
+<em>コードと合わせて参照することで、実装と指標の対応関係を理解できます。</em></p>
+
+</body>
+</html>
